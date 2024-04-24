@@ -50,7 +50,8 @@ int readQueue(struct Queue* queue, Message_p *message) {
 	queue->readCur = tmp;
 
     queue->totalRead++;
-	pthread_mutex_unlock(&queue->mutex);	
+	pthread_mutex_unlock(&queue->mutex);
+
 	return 0;
 }
 

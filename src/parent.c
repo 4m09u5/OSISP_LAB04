@@ -12,6 +12,7 @@
 #include "consumer.h"
 #include <string.h>
 #include <termios.h>
+#include <sys/mman.h>
 
 pid_t *producers = NULL;
 size_t producersSize = 0;
@@ -50,7 +51,7 @@ void createProducer(struct SharedMemory *shared, struct Queue *queue) {
     producers = realloc(producers, (++producersSize) * sizeof(pid_t));
     producers[producersSize - 1] = pid;
 
-    printf("Created new producer. Total producers: %d\n", producersSize);
+    printf("Created new producer. Total producers: %ld\n", producersSize);
 }
 
 void killProducer() {
@@ -68,7 +69,7 @@ void killProducer() {
         producers = NULL;
     }
 
-    printf("Killed a producer. Total producers: %d\n", producersSize);
+    printf("Killed a producer. Total producers: %ld\n", producersSize);
 }
 
 void createConsumer(struct SharedMemory *shared, struct Queue *queue) {
@@ -82,7 +83,7 @@ void createConsumer(struct SharedMemory *shared, struct Queue *queue) {
     consumers = realloc(consumers, (++consumersSize) * sizeof(pid_t));
     consumers[consumersSize - 1] = pid;
 
-    printf("Created new consumer. Total consumers: %d\n", consumersSize);
+    printf("Created new consumer. Total consumers: %ld\n", consumersSize);
 }
 
 void killConsumer() {
@@ -100,24 +101,26 @@ void killConsumer() {
         consumers = NULL;
     }
 
-    printf("Killed a consumer. Total consumers: %d\n", consumersSize);
+    printf("Killed a consumer. Total consumers: %ld\n", consumersSize);
 }
 
 //https://stackoverflow.com/questions/71771807/unable-to-share-data-using-mmap-sharedmemory-between-two-processes
 int main() {
-    struct SharedMemory shared = initializeSharedMemory(sysconf(_SC_PAGESIZE) * 1024);
+    struct SharedMemory *shared = mmap(NULL, sysconf(_SC_PAGESIZE), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
-    struct Queue *queue;
+    (*shared) = initializeSharedMemory(sysconf(_SC_PAGESIZE) * 1024);
 
-    queue = createQueue(100, &shared);
+    struct Queue *queue = (void*)(shared + 1);
+
+    (*queue) = *createQueue(100, shared);
 
     char action;
 
     while ((action = getch()) != 'q') {
         switch (action) {
-            case 'o': createConsumer(&shared, queue); break;
+            case 'o': createConsumer(shared, queue); break;
             case 'i': killConsumer(); break;
-            case 'l': createProducer(&shared, queue); break;
+            case 'l': createProducer(shared, queue); break;
             case 'k': killProducer(); break;
         }
     }

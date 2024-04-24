@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g2 -ggdb -std=c11 -pedantic -W -Wall -Wextra
+CFLAGS=-g2 -ggdb -std=c11 -pedantic -W -Wall -Wextra -Wno-pointer-arith
 
 .SUFFIXES:
 .SUFFIXES: .c .o
@@ -13,7 +13,7 @@ vpath %.h src
 vpath %.o build/debug
 
 ifeq ($(MODE), release)
-	CFLAGS = -std=c11 -pedantic -W -Wall -Wextra -Wno-unused-parameter -Werror
+	CFLAGS = -std=c11 -pedantic -W -Wall -Wextra -Wno-unused-parameter -Wno-pointer-arith -Werror
 	OUT_DIR = $(RELEASE)
 	vpath %.o build/release
 endif

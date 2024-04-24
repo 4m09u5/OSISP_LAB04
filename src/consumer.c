@@ -1,6 +1,7 @@
 #include "onSignal.h"
 #include "queue.h"
 #include "sharedmem.h"
+#include <stdio.h>
 
 int workConsumer = 1;
 
@@ -14,7 +15,8 @@ void consume(struct SharedMemory *shared, struct Queue *queue) {
     while (workConsumer) {
         Message_p message;
         
-        while (readQueue(queue, &message) && workConsumer);
+        while (readQueue(queue, &message) && workConsumer)
+            sleep(1);
 
         if (!workConsumer)
             return;
@@ -34,15 +36,13 @@ void consume(struct SharedMemory *shared, struct Queue *queue) {
 
         if (message->hash != hash)
             printf("WARNING!!! HASHES DIDNT MATCH!\n");
-        
-        shfree(shared, message->data);
-        shfree(shared, message);
 
         uint64_t reads = getTotalQueueReads(queue);
         uint64_t writes = getTotalQueueWrites(queue);
 
-
         printf("Message consumed! Desired hash: %04x; Computed hash: %04x. Queue stats: R: %lu, W: %lu \n", message->hash, hash, reads, writes);
-        usleep(400000);
+        shfree(shared, message->data);
+        shfree(shared, message);
+        sleep(1);
     }
 }

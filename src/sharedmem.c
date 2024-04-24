@@ -50,7 +50,7 @@ void *shmalloc(struct SharedMemory *mem, size_t size) {
 
     struct SharedMemoryBlock* temp = mem->memory;
 
-    while (temp < mem->memory + mem->size + sizeof(struct SharedMemoryBlock) && temp <= mem->last_available) {
+    while ((void*)temp < mem->memory + mem->size + sizeof(struct SharedMemoryBlock) && (void*)temp <= mem->last_available) {
         if(temp->avaliable && size <= temp->size) {
             temp->avaliable = 0;
             pthread_mutex_unlock(mem->mutex);

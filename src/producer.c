@@ -1,6 +1,8 @@
 #include "onSignal.h"
 #include "queue.h"
 #include "sharedmem.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int workProducer = 1;
 
@@ -41,14 +43,22 @@ void produce(struct SharedMemory *shared, struct Queue *queue) {
         }
 
         message->hash = hash;
+        int queueResult = 0;
 
-        while (writeQueue(queue, message));
+        while ((queueResult = writeQueue(queue, message)) && workProducer)
+            sleep(1);
+        
+        if (!workProducer && queueResult) {
+            shfree(shared, message->data);
+            shfree(shared, message);
+            return;
+        }
 
         printf("Produced a message! Hash: %04x\n", message->hash);
 
         if (!workProducer)
             return;
             
-        usleep(400000);
+        sleep(1);
     }
 }

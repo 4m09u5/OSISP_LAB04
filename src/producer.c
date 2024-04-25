@@ -54,7 +54,10 @@ void produce(struct SharedMemory *shared, struct Queue *queue) {
             return;
         }
 
-        printf("Produced a message! Hash: %04x\n", message->hash);
+        uint64_t reads = getTotalQueueReads(queue);
+        uint64_t writes = getTotalQueueWrites(queue);
+
+        printf("Produced a message! Hash: %04x. Queue stats: R: %lu W: %lu\n", message->hash, reads, writes);
 
         if (!workProducer)
             return;

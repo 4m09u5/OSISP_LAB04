@@ -1,4 +1,4 @@
-# 3rd lab
+# 4th lab
 
 ### What does this program do?
 
@@ -17,3 +17,9 @@ or
 ```
 make MODE=debug
 ```
+
+Use `l` key to create a producer. Use `k` key to kill it.
+
+Use `o` key to create a consumer. Use `i` key to kill it.
+
+Use `q` key to kill all consumers and producers and terminate the program.
